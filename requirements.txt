@@ -1,0 +1,7 @@
+black
+pylint
+flask
+Pillow
+pytesseract
+pdf2image
+python-dotenv
