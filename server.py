@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv(dotenv_path)
 
-if os.environ["DEV"] == 1:
+if os.environ["DEV"] == "1":
     pytesseract.pytesseract.tesseract_cmd = (
         "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
     )
