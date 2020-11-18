@@ -4,8 +4,12 @@ import sys
 from pdf2image import convert_from_path
 import os
 from flask import Flask, request
-from multiprocessing.pool import ThreadPool
 from dotenv import load_dotenv
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
+import enum
+import uuid
 
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv(dotenv_path)
@@ -28,39 +32,79 @@ app = Flask(__name__)
 uploads_dir = os.path.join(os.path.dirname(__file__), "uploads")
 os.makedirs(uploads_dir, exist_ok=True)
 
+global job_counter
+job_counter = 0
+job_results = {}
+
+
+class JobStatus(enum.Enum):
+    InProgress = 0
+    Done = 1
+
+
+class JobResult:
+    def __init__(self):
+        self.status = JobStatus.InProgress
+
+    def set_result(self, result):
+        self.result = result
+        self.status = JobStatus.Done
+
 
 @app.route("/ocr", methods=["POST"])
 def ocrProcess():
     pdf_document = request.files["document"]
-    pdf_document_path = os.path.join(uploads_dir, pdf_document.filename)
+    pdf_document_path = os.path.join(uploads_dir, f"{uuid.uuid4()}.pdf")
     pdf_document.save(pdf_document_path)
-    pages = convert_from_path(pdf_document_path, 300)
 
-    pool = ThreadPool(5)
-    results = []
+    global job_counter
+    job_id = job_counter
+    job_results[job_id] = JobResult()
+    job_counter += 1
+    th = threading.Thread(
+        target=process_pdf,
+        args=(
+            job_id,
+            pdf_document_path,
+        ),
+    )
+    th.start()
+    print(
+        f"Started job {job_id}",
+    )
 
-    for i, page in enumerate(pages):
-        filename = f"{pdf_document_path}_page_{i}.jpg"
-        page.save(filename, "JPEG")
-        results.append(pool.apply_async(get_text_from_image, args=(filename,)))
-        print(
-            f"Started job {i}",
-        )
+    return {"job_id": job_id}
 
-    pool.close()
-    pool.join()
+
+def process_pdf(job_id, pdf_document_path):
+    pages = convert_from_path(pdf_document_path, thread_count=4)
 
     ocr_result = ""
 
-    for result in results:
-        ocr_result += result.get()
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        results = executor.map(
+            lambda args: get_text_from_image(*args),
+            (
+                (i, job_id, len(pages), pdf_document_path, page)
+                for i, page in enumerate(pages)
+            ),
+        )
+
+        for result in results:
+            ocr_result += result
 
     os.remove(pdf_document_path)
+    job_results[job_id].result = ocr_result
+    job_results[job_id].status = JobStatus.Done
+    print(f"Job {job_id} done")
 
-    return ocr_result
 
-
-def get_text_from_image(filename):
+def get_text_from_image(i, job_id, total_pages, pdf_document_path, page):
+    print(
+        f"Started processing image {i + 1} / {total_pages} of job {job_id}",
+    )
+    filename = f"{pdf_document_path[:-4]}_page_{i + 1}.jpg"
+    page.save(filename, "JPEG")
     result = str(
         (
             (
@@ -72,6 +116,21 @@ def get_text_from_image(filename):
     )
     os.remove(filename)
     return result
+
+
+@app.route("/ocr/<job_id>", methods=["GET"])
+def getOcrResult(job_id):
+    try:
+        job_result = job_results[int(job_id)]
+    except KeyError:
+        return {"error": "No job"}
+
+    if job_result.status == JobStatus.InProgress:
+        return {"error": "Result not yet ready"}
+    else:
+        result = job_result.result
+        job_results.pop(int(job_id))
+        return result
 
 
 if __name__ == "__main__":
