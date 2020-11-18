@@ -19,8 +19,9 @@ if os.environ["DEV"] == "1":
     tessdata_dir_config = r'--tessdata-dir "C:\\Program Files\\Tesseract-OCR\\tessdata"'
     host_address = "127.0.0.1"
 else:
-    pytesseract.pytesseract.tesseract_cmd = "/app/.apt/usr/bin/tesseract"
-    tessdata_dir_config = r'--tessdata-dir "/app/.apt/usr/bin/tesseract/tessdata"'
+    tessdata_dir_config = (
+        r'--tessdata-dir "./.apt/usr/share/tesseract-ocr/4.00/tessdata"'
+    )
 
 app = Flask(__name__)
 
