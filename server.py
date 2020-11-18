@@ -123,13 +123,13 @@ def getOcrResult(job_id):
     try:
         job_result = job_results[int(job_id)]
     except KeyError:
-        return {"error": "No job"}
+        return {"error": "No job with that id"}
 
     if job_result.status == JobStatus.InProgress:
         return {"error": "Result not yet ready"}
     else:
         result = job_result.result
-        job_results.pop(int(job_id))
+        # job_results.pop(int(job_id))
         return result
 
 
