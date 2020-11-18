@@ -16,9 +16,11 @@ if os.environ["DEV"] == "1":
     pytesseract.pytesseract.tesseract_cmd = (
         "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
     )
+    tessdata_dir_config = r'--tessdata-dir "C:\\Program Files\\Tesseract-OCR\\tessdata"'
     host_address = "127.0.0.1"
 else:
     pytesseract.pytesseract.tesseract_cmd = "/app/.apt/usr/bin/tesseract"
+    tessdata_dir_config = r'--tessdata-dir "/app/.apt/usr/bin/tesseract/tessdata"'
 
 app = Flask(__name__)
 
@@ -58,7 +60,15 @@ def ocrProcess():
 
 
 def get_text_from_image(filename):
-    result = str(((pytesseract.image_to_string(Image.open(filename)))))
+    result = str(
+        (
+            (
+                pytesseract.image_to_string(
+                    Image.open(filename), config=tessdata_dir_config
+                )
+            )
+        )
+    )
     os.remove(filename)
     return result
 
