@@ -10,13 +10,13 @@ from dotenv import load_dotenv
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv(dotenv_path)
 
-host_address = "127.0.0.1"
+host_address = "0.0.0.0"
 
 if os.environ["DEV"] == "1":
     pytesseract.pytesseract.tesseract_cmd = (
         "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
     )
-    host_address = "0.0.0.0"
+    host_address = "127.0.0.1"
 
 app = Flask(__name__)
 
