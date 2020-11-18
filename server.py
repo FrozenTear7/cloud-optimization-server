@@ -10,10 +10,13 @@ from dotenv import load_dotenv
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv(dotenv_path)
 
+host_address = "127.0.0.1"
+
 if os.environ["DEV"] == "1":
     pytesseract.pytesseract.tesseract_cmd = (
         "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
     )
+    host_address = "0.0.0.0"
 
 app = Flask(__name__)
 
@@ -60,5 +63,5 @@ def get_text_from_image(filename):
 
 if __name__ == "__main__":
     port = os.environ["PORT"]
-    app.run(port=port)
+    app.run(host=host_address, port=port)
     print(f"Server started at port: {port}")
