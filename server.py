@@ -17,6 +17,8 @@ if os.environ["DEV"] == "1":
         "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
     )
     host_address = "127.0.0.1"
+else:
+    pytesseract.pytesseract.tesseract_cmd = "/app/.apt/usr/bin/tesseract"
 
 app = Flask(__name__)
 
