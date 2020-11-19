@@ -134,7 +134,7 @@ def getOcrResult(job_id):
     else:
         result = job_result.result
         # job_results.pop(int(job_id))
-        return result
+        return {"result": result}
 
 
 if __name__ == "__main__":
