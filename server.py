@@ -130,11 +130,11 @@ def getOcrResult(job_id):
         return {"error": "No job with that id"}
 
     if job_result.status == JobStatus.InProgress:
-        return {"error": "Result not yet ready"}
+        return {"status": "IN_PROGRESS"}
     else:
         result = job_result.result
         # job_results.pop(int(job_id))
-        return {"result": result}
+        return {"result": result, "status": "DONE"}
 
 
 if __name__ == "__main__":
