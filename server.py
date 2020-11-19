@@ -78,7 +78,9 @@ def ocrProcess():
 
 def process_pdf(job_id, pdf_document_path):
     pages = convert_from_path(
-        pdf_document_path, thread_count=int(os.environ["THREADS"])
+        pdf_document_path,
+        thread_count=int(os.environ["THREADS"]),
+        use_pdftocairo=True,
     )
 
     ocr_result = ""
@@ -105,7 +107,7 @@ def get_text_from_image(i, job_id, total_pages, pdf_document_path, page):
     print(
         f"Started processing image {i + 1} / {total_pages} of job {job_id}",
     )
-    filename = f"{pdf_document_path[:-4]}_page_{i + 1}.jpg"
+    filename = f"{pdf_document_path[:-4]}-{i + 1}.jpg"
     page.save(filename, "JPEG")
     result = str(
         (
