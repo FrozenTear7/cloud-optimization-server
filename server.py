@@ -77,11 +77,11 @@ def ocrProcess():
 
 
 def process_pdf(job_id, pdf_document_path):
-    pages = convert_from_path(pdf_document_path, thread_count=4)
+    pages = convert_from_path(pdf_document_path, thread_count=os.environ["THREADS"])
 
     ocr_result = ""
 
-    with ThreadPoolExecutor(max_workers=4) as executor:
+    with ThreadPoolExecutor(max_workers=os.environ["THREADS"]) as executor:
         results = executor.map(
             lambda args: get_text_from_image(*args),
             (
