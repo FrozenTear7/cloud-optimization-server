@@ -21,7 +21,6 @@ if os.environ["DEV"] == "1":
         "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
     )
     tessdata_dir_config = r'--tessdata-dir "C:\\Program Files\\Tesseract-OCR\\tessdata"'
-    host_address = "127.0.0.1"
 else:
     tessdata_dir_config = (
         r'--tessdata-dir "./.apt/usr/share/tesseract-ocr/4.00/tessdata"'
@@ -140,4 +139,3 @@ def getOcrResult(job_id):
 if __name__ == "__main__":
     port = os.environ["PORT"]
     app.run(host=host_address, port=port)
-    print(f"Server started at port: {port}")
